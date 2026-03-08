@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ACASE — Security Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&family=Exo+2:wght@200;400;700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #020b12;
+    --panel: #061420;
+    --panel2: #0a1e2e;
+    --border: #0e3a55;
+    --accent: #00d4ff;
+    --accent2: #ff3e6c;
+    --accent3: #00ff9d;
+    --warn: #ffb700;
+    --text: #c8e6f5;
+    --dim: #4a7a99;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 40px;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-icon {
+    width: 48px; height: 48px;
+    border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  .logo-text h1 {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  .logo-text p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 2px;
+  }
+
+  .header-meta {
+    text-align: right;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.8;
+  }
+
+  .grid-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+  }
+
+  .panel.danger::before { background: var(--accent2); }
+  .panel.safe::before { background: var(--accent3); }
+
+  .panel-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .panel-value {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 900;
+    font-size: 42px;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .panel-value.danger { color: var(--accent2); }
+  .panel-value.safe { color: var(--accent3); }
+  .panel-value.accent { color: var(--accent); }
+
+  .panel-sub {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 6px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .section-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 30px 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .findings-list {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+  }
+
+  .finding-item {
+    padding: 12px;
+    margin-bottom: 10px;
+    background: var(--panel2);
+    border-left: 3px solid var(--accent2);
+  }
+
+  .finding-title {
+    font-weight: 600;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .finding-desc {
+    font-size: 13px;
+    color: var(--dim);
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">AC</div>
+      <div class="logo-text">
+        <h1>ACASE</h1>
+        <p>// AUTHENTICATION SECURITY ASSESSMENT — ML DASHBOARD</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div>TARGET // http://localhost:8080</div>
+      <div>SCAN DATE // 2026-02-21</div>
+      <div>ENGINE // MISTRAL AI + PYTHON</div>
+    </div>
+  </header>
+
+  <div class="grid-top">
+    <div class="panel danger">
+      <div class="panel-label">// overall risk score</div>
+      <div class="panel-value danger">72</div>
+      <div class="panel-sub">/ 100 — HIGH RISK</div>
+    </div>
+
+    <div class="panel danger">
+      <div class="panel-label">// vulnerabilities found</div>
+      <div class="panel-value danger">2</div>
+      <div class="panel-sub">ACTIVE FINDINGS</div>
+    </div>
+
+    <div class="panel safe">
+      <div class="panel-label">// modules executed</div>
+      <div class="panel-value safe">6</div>
+      <div class="panel-sub">SESSION / ENUM / EMAIL</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">// ai decisions made</div>
+      <div class="panel-value accent">5</div>
+      <div class="panel-sub">MISTRAL REASONING</div>
+    </div>
+  </div>
+
+  <div class="section-title">vulnerability findings</div>
+
+  <div class="findings-list">
+    <div class="finding-item">
+      <div class="finding-title">Email Enumeration Risk</div>
+      <div class="finding-desc">Password reset endpoint may reveal registered email addresses</div>
+    </div>
+
+    <div class="finding-item">
+      <div class="finding-title">No MFA Protection</div>
+      <div class="finding-desc">Multi-factor authentication is not enabled</div>
+    </div>
+
+    <div class="finding-item">
+      <div class="finding-title">Session Security</div>
+      <div class="finding-desc">Cookie flags could be strengthened (HttpOnly, Secure, SameSite)</div>
+    </div>
+  </div>
+
+  <div class="section-title">email validation results</div>
+
+  <div class="findings-list">
+    <div style="padding: 16px;">
+      <div style="font-family: 'Share Tech Mono', monospace; font-size: 13px;">
+        <div style="margin-bottom: 8px;">✓ Email format validation: <span style="color: var(--accent3);">PASS</span></div>
+        <div style="margin-bottom: 8px;">✓ Domain authorization: <span style="color: var(--accent3);">VERIFIED</span></div>
+        <div style="margin-bottom: 8px;">✓ Reset endpoint tested: <span style="color: var(--warn);">SECURE</span></div>
+        <div style="margin-bottom: 8px;">✓ Login endpoint tested: <span style="color: var(--warn);">SECURE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    ACASE - AUTHENTICATION SECURITY ASSESSMENT CLI ENGINE<br>
+    AUTHORIZED LAB TESTING ONLY // MISTRAL AI-POWERED ANALYSIS
+  </footer>
+
+</div>
+</body>
+</html>

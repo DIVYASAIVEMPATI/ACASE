@@ -1,0 +1,7 @@
+=== ACASE SECURITY SCAN LOG ===
+Started: 2026-02-27T08:28:01.836204
+==================================================
+
+[2026-02-27T08:28:01.837150] [INFO] SYSTEM: Scan initiated
+[2026-02-27T08:28:49.409405] [HIGH] SSL/TLS: Site not using HTTPS - vulnerable to SSL stripping
+[2026-02-27T08:28:49.409650] [HIGH] SSL/TLS: Missing HSTS header - vulnerable to SSL stripping attacks

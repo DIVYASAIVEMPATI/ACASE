@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ACASE Security Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            padding: 20px;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 48px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .scan-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 30px 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .scan-info-item { text-align: center; padding: 10px; }
+        .scan-info-label {
+            font-size: 12px;
+            opacity: 0.7;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .scan-info-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border-top: 4px solid #667eea;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-value {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+        .critical { color: #ff4757; }
+        .high { color: #ffa502; }
+        .safe { color: #1dd1a1; }
+        .section {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 35px;
+            margin: 30px 0;
+        }
+        .section-title {
+            font-size: 28px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        .module-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid;
+        }
+        .module-card.pass { border-color: #1dd1a1; }
+        .module-card.fail { border-color: #ff4757; }
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-badge.pass { background: #1dd1a1; color: #000; }
+        .status-badge.fail { background: #ff4757; color: #fff; }
+        .alert-box {
+            background: rgba(255, 71, 87, 0.2);
+            border-left: 4px solid #ff4757;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+        }
+        .error {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid #ff4757;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .realtime-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #1dd1a1;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .llm-section {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ ACASE Security Dashboard</h1>
+            <p>COMPLETE AITM DETECTION & AUTHENTICATION ASSESSMENT</p>
+        </header>
+        
+        <div id="loading" class="loading">
+            <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+            <div>Loading scan data...</div>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
+            <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Error Loading Data</div>
+            <div style="font-size: 14px;">Retrying...</div>
+        </div>
+        
+        <div id="content" style="display: none;">
+            <div class="scan-info">
+                <div class="scan-info-item">
+                    <div class="scan-info-label">Target URL</div>
+                    <div class="scan-info-value" id="target-url">--</div>
+                </div>
+                <div class="scan-info-item">
+                    <div class="scan-info-label">Scan Date</div>
+                    <div class="scan-info-value" id="scan-date">--</div>
+                </div>
+                <div class="scan-info-item">
+                    <div class="scan-info-label">Email Tested</div>
+                    <div class="scan-info-value" id="email-tested">--</div>
+                </div>
+                <div class="scan-info-item">
+                    <div class="scan-info-label">Real-time Status</div>
+                    <div class="scan-info-value">
+                        <span class="realtime-indicator"></span> ACTIVE
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Risk Score</div>
+                    <div class="stat-value high" id="risk-score">--</div>
+                    <div class="stat-label" id="risk-label">--</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Total Vulnerabilities</div>
+                    <div class="stat-value critical" id="total-vulns">--</div>
+                    <div class="stat-label">Across All Modules</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">AitM Issues</div>
+                    <div class="stat-value high" id="aitm-count">--</div>
+                    <div class="stat-label">8 Detection Modules</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Auth Issues</div>
+                    <div class="stat-value safe" id="auth-count">--</div>
+                    <div class="stat-label">6 Testing Modules</div>
+                </div>
+            </div>
+            
+            <!-- Real-time Alerts Section -->
+            <div class="section">
+                <div class="section-title">🚨 Real-Time AitM Alerts</div>
+                <div id="realtime-alerts">
+                    <div style="text-align: center; padding: 20px; opacity: 0.7;">
+                        No alerts detected. Monitoring active...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- LLM Analysis Section -->
+            <div class="section" id="llm-section" style="display: none;">
+                <div class="section-title">🤖 AI Security Analysis (Mistral)</div>
+                <div class="llm-section">
+                    <div id="llm-content"></div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">🎯 AitM Detection Results</div>
+                <div class="module-grid" id="aitm-modules"></div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">📧 Email Security Assessment</div>
+                <div id="email-section"></div>
+            </div>
+            
+            <footer style="text-align: center; padding: 40px 0; opacity: 0.6; margin-top: 40px;">
+                <p><strong>ACASE v2.0</strong> - AI-Powered Security Assessment</p>
+                <p>Real-time Monitoring Active | Mistral LLM Integration</p>
+            </footer>
+        </div>
+    </div>
+    
+    <script>
+        let retryCount = 0;
+        const maxRetries = 10;
+        
+        async function loadScanData() {
+            try {
+                const response = await fetch('scan_data.json?t=' + Date.now());
+                
+                if (!response.ok) {
+                    throw new Error('File not found');
+                }
+                
+                const data = await response.json();
+                
+                // Verify scan is complete
+                if (!data.scan_complete && retryCount < maxRetries) {
+                    retryCount++;
+                    setTimeout(loadScanData, 2000);
+                    return;
+                }
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+                // Update UI
+                document.getElementById('target-url').textContent = data.target || 'N/A';
+                document.getElementById('scan-date').textContent = data.scan_date || 'N/A';
+                document.getElementById('email-tested').textContent = data.email || 'N/A';
+                
+                const riskScore = data.risk_score || 0;
+                document.getElementById('risk-score').textContent = riskScore;
+                
+                let riskLabel = 'Low Risk';
+                let riskClass = 'safe';
+                if (riskScore >= 70) {
+                    riskLabel = 'High Risk';
+                    riskClass = 'critical';
+                } else if (riskScore >= 40) {
+                    riskLabel = 'Medium Risk';
+                    riskClass = 'high';
+                }
+                
+                document.getElementById('risk-label').textContent = riskLabel;
+                document.getElementById('risk-score').className = 'stat-value ' + riskClass;
+                
+                document.getElementById('total-vulns').textContent = data.total_vulnerabilities || 0;
+                
+                const vulnCounts = data.vulnerability_counts || {};
+                const aitmCount = (vulnCounts.ssl_tls || 0) + (vulnCounts.session_hijack || 0) +
+                                 (vulnCounts.arp_spoofing || 0) + (vulnCounts.proxy || 0) +
+                                 (vulnCounts.dns_spoofing || 0) + (vulnCounts.token_misuse || 0) +
+                                 (vulnCounts.rogue_gateway || 0);
+                
+                document.getElementById('aitm-count').textContent = aitmCount;
+                document.getElementById('auth-count').textContent = vulnCounts.email || 0;
+                
+                // Render LLM analysis if available
+                if (data.llm_analysis && !data.llm_analysis.error) {
+                    renderLLMAnalysis(data.llm_analysis);
+                }
+                
+                renderAitmModules(data);
+                renderEmailSection(data);
+                
+                // Start real-time alert monitoring
+                loadRealtimeAlerts();
+                setInterval(loadRealtimeAlerts, 5000);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    setTimeout(loadScanData, 2000);
+                }
+            }
+        }
+        
+        async function loadRealtimeAlerts() {
+            try {
+                const response = await fetch('reports/realtime_alerts.json?t=' + Date.now());
+                if (!response.ok) return;
+                
+                const alerts = await response.json();
+                const container = document.getElementById('realtime-alerts');
+                
+                if (alerts.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; opacity: 0.7;">No alerts detected. Monitoring active...</div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                alerts.slice(-5).reverse().forEach(alert => {
+                    const div = document.createElement('div');
+                    div.className = 'alert-box';
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>${alert.type}</strong>
+                            <span style="opacity: 0.8;">${alert.timestamp}</span>
+                        </div>
+                        <div style="margin-top: 8px;">${alert.message}</div>
+                    `;
+                    container.appendChild(div);
+                });
+                
+            } catch (e) {
+                console.log('Alert fetch failed:', e);
+            }
+        }
+        
+        function renderLLMAnalysis(llm) {
+            const section = document.getElementById('llm-section');
+            const content = document.getElementById('llm-content');
+            
+            if (llm.error) {
+                content.innerHTML = `<p style="opacity: 0.7;">${llm.error}</p>`;
+            } else {
+                let html = '';
+                if (llm.executive_summary) {
+                    html += `<h4>Executive Summary</h4><p>${llm.executive_summary}</p>`;
+                }
+                if (llm.technical_summary) {
+                    html += `<h4>Technical Summary</h4><p>${llm.technical_summary}</p>`;
+                }
+                if (llm.critical_issues) {
+                    html += `<h4>Critical Issues</h4><p>${llm.critical_issues}</p>`;
+                }
+                if (llm.remediation_priority) {
+                    html += `<h4>Remediation Priority</h4><p>${llm.remediation_priority}</p>`;
+                }
+                content.innerHTML = html;
+            }
+            
+            section.style.display = 'block';
+        }
+        
+        function renderAitmModules(data) {
+            const modules = [
+                {name: 'SSL/TLS Security', key: 'ssl_tls'},
+                {name: 'Session Hijacking', key: 'session_hijack'},
+                {name: 'ARP Spoofing', key: 'arp_spoofing'},
+                {name: 'Proxy Detection', key: 'proxy'},
+                {name: 'DNS Spoofing', key: 'dns_spoofing'},
+                {name: 'Token Misuse', key: 'token_misuse'},
+                {name: 'Rogue Gateway', key: 'rogue_gateway'}
+            ];
+            
+            const container = document.getElementById('aitm-modules');
+            container.innerHTML = '';
+            
+            const vulnCounts = data.vulnerability_counts || {};
+            
+            modules.forEach(mod => {
+                const count = vulnCounts[mod.key] || 0;
+                const status = count === 0 ? 'pass' : 'fail';
+                const badge = count === 0 ? 'SECURE' : `${count} ISSUE${count > 1 ? 'S' : ''}`;
+                
+                const card = document.createElement('div');
+                card.className = `module-card ${status}`;
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <div style="font-size: 18px; font-weight: bold;">${mod.name}</div>
+                        <span class="status-badge ${status}">${badge}</span>
+                    </div>
+                    <div style="opacity: 0.8;">
+                        ${count === 0 ? '✓ No vulnerabilities detected' : `⚠️ ${count} security issue${count > 1 ? 's' : ''} found`}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        function renderEmailSection(data) {
+            const container = document.getElementById('email-section');
+            const vulnCounts = data.vulnerability_counts || {};
+            const emailCount = vulnCounts.email || 0;
+            const status = emailCount === 0 ? 'pass' : 'fail';
+            
+            container.innerHTML = `
+                <div class="module-card ${status}">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="font-size: 20px; font-weight: bold;">📧 Email: ${data.email || 'N/A'}</div>
+                        <span class="status-badge ${status}">
+                            ${emailCount === 0 ? 'VALIDATED' : emailCount + ' ISSUE(S)'}
+                        </span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        ${emailCount === 0 ? 
+                          '<div style="color: #1dd1a1; padding: 10px; background: rgba(29,209,161,0.1); border-radius: 8px;">✓ All email validation tests passed successfully</div>' :
+                          '<div style="color: #ff4757; padding: 10px; background: rgba(255,71,87,0.1); border-radius: 8px;">⚠️ Email enumeration vulnerabilities detected</div>'
+                        }
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Start loading
+        document.addEventListener('DOMContentLoaded', loadScanData);
+    </script>
+</body>
+</html>

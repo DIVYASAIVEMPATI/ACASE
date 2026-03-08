@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-02-27T06:14:23.190342",
+  "tests_performed": [
+    {
+      "test": "ARP_TABLE_ANALYSIS",
+      "result": "PASS",
+      "entries_checked": 4
+    },
+    {
+      "test": "GATEWAY_VERIFICATION",
+      "result": "INFO"
+    },
+    {
+      "test": "ARP_PATTERNS",
+      "result": "COMPLETE"
+    }
+  ],
+  "vulnerabilities": [],
+  "arp_table": [
+    {
+      "ip": "172.17.0.3",
+      "mac": "a2:e7:c1:b4:ed:27"
+    },
+    {
+      "ip": "192.168.230.254",
+      "mac": "00:50:56:ed:0e:51"
+    },
+    {
+      "ip": "172.17.0.2",
+      "mac": "3e:07:ec:3d:25:fe"
+    },
+    {
+      "ip": "192.168.230.2",
+      "mac": "00:50:56:ea:2e:33"
+    }
+  ],
+  "suspicious_entries": []
+}

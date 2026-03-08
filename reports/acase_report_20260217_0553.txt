@@ -1,0 +1,41 @@
+============================================================
+  ACASE SECURITY ASSESSMENT REPORT
+============================================================
+  Target : http://localhost
+  Date   : 2026-02-17 05:53
+============================================================
+
+[FINDINGS]
+
+  [!] Reset endpoint reveals if email is registered.
+  [!] Email enumeration via reset endpoint.
+
+[ATTACK PATH]
+
+  TEST_SESSION
+  |
+  v
+  ENUM_USER
+  |
+  v
+  TEST_RESET
+  |
+  v
+  CONTROLLED_SPRAY
+  |
+  v
+  TEST_MFA
+
+[BUSINESS IMPACT]
+
+  This vulnerability path could lead to unauthorized access (account takeover) and potential exposure of customer data, posing significant financial risks due to unauthorized transactions or data breaches. It compromises the security controls, undermining trust in the business and potentially leading to regulatory penalties and reputational damage.
+
+[RECOMMENDATIONS]
+
+  1. Use generic error messages for all auth failures.
+  2. Use cryptographically random reset tokens (min 32 bytes).
+  3. Set Secure, HttpOnly, SameSite=Strict on all cookies.
+  4. Implement lockout or CAPTCHA after repeated failures.
+  5. Enforce MFA for all sensitive accounts.
+
+============================================================

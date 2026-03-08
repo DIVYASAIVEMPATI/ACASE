@@ -1,0 +1,38 @@
+============================================================
+  ACASE SECURITY ASSESSMENT REPORT
+============================================================
+  Target : http://localhost
+  Date   : 2026-02-17 03:41
+============================================================
+
+[FINDINGS]
+
+  [!] Reset endpoint reveals if email is registered.
+  [!] Email enumeration via reset endpoint.
+
+[ATTACK PATH]
+
+  TEST_SESSION
+  |
+  v
+  ENUM_USER
+  |
+  v
+  TEST_RESET
+  |
+  v
+  TEST_MFA
+
+[BUSINESS IMPACT]
+
+  AI impact summary unavailable - Ollama not running.
+
+[RECOMMENDATIONS]
+
+  1. Use generic error messages for all auth failures.
+  2. Use cryptographically random reset tokens (min 32 bytes).
+  3. Set Secure, HttpOnly, SameSite=Strict on all cookies.
+  4. Implement lockout or CAPTCHA after repeated failures.
+  5. Enforce MFA for all sensitive accounts.
+
+============================================================

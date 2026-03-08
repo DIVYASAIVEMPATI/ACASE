@@ -1,0 +1,38 @@
+============================================================
+  ACASE SECURITY ASSESSMENT REPORT
+============================================================
+  Target : http://localhost:8080
+  Date   : 2026-02-21 01:32
+============================================================
+
+[FINDINGS]
+
+  [!] Reset endpoint reveals if email is registered.
+  [!] Email enumeration via reset endpoint.
+
+[ATTACK PATH]
+
+  ENUM_USER
+  |
+  v
+  TEST_SESSION
+  |
+  v
+  TEST_RESET
+  |
+  v
+  CONTROLLED_SPRAY
+
+[BUSINESS IMPACT]
+
+  This vulnerability path (ENUM_USER -> TEST_SESSION -> TEST_RESET -> CONTROLLED_SPRAY) poses significant business risks. It allows an attacker to enumerate user accounts, reset sessions, and control account access, potentially leading to unauthorized data access, account takeover, and severe financial risks due to fraudulent transactions.
+
+[RECOMMENDATIONS]
+
+  1. Use generic error messages for all auth failures.
+  2. Use cryptographically random reset tokens (min 32 bytes).
+  3. Set Secure, HttpOnly, SameSite=Strict on all cookies.
+  4. Implement lockout or CAPTCHA after repeated failures.
+  5. Enforce MFA for all sensitive accounts.
+
+============================================================

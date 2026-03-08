@@ -1,0 +1,175 @@
+{
+  "target": "https://isafe.xo.je/",
+  "email": "wolvarine670@gmail.com",
+  "timestamp": "2026-03-04T02:55:19.184599",
+  "scan_date": "2026-03-04 02:55:19",
+  "risk_score": 58,
+  "vulnerability_counts": {
+    "ssl_tls": 1,
+    "session_hijack": 0,
+    "arp_spoofing": 0,
+    "proxy": 0,
+    "dns_spoofing": 0,
+    "token_misuse": 0,
+    "rogue_gateway": 0,
+    "email": 0,
+    "auth": 0
+  },
+  "total_vulnerabilities": 1,
+  "modules_executed": 14,
+  "findings": {
+    "SSL_TLS_SECURITY": {
+      "vulnerabilities": [
+        {
+          "severity": "HIGH",
+          "type": "MISSING_HSTS",
+          "message": "Missing HSTS header - vulnerable to SSL stripping attacks"
+        }
+      ],
+      "tests_performed": [
+        {
+          "test": "HTTPS_CHECK",
+          "result": "PASS"
+        },
+        {
+          "test": "CERTIFICATE_VALIDATION",
+          "result": "PASS",
+          "details": "Valid certificate, TLSv1.3, 256 bits"
+        },
+        {
+          "test": "SECURITY_HEADERS",
+          "result": "COMPLETE",
+          "headers_found": 0
+        },
+        {
+          "test": "MIXED_CONTENT",
+          "result": "PASS"
+        }
+      ],
+      "status": "FAIL"
+    },
+    "SESSION_HIJACKING": {
+      "vulnerabilities": [],
+      "tests_performed": [],
+      "status": "PASS"
+    },
+    "ARP_SPOOFING": {
+      "vulnerabilities": [],
+      "tests_performed": [
+        {
+          "test": "ARP_TABLE_ANALYSIS",
+          "result": "PASS",
+          "entries_checked": 4
+        },
+        {
+          "test": "GATEWAY_VERIFICATION",
+          "result": "INFO"
+        },
+        {
+          "test": "ARP_PATTERNS",
+          "result": "COMPLETE"
+        }
+      ],
+      "status": "PASS"
+    },
+    "MITM_PROXY": {
+      "vulnerabilities": [],
+      "tests_performed": [
+        {
+          "test": "PROXY_HEADERS",
+          "result": "PASS"
+        },
+        {
+          "test": "LATENCY_ANALYSIS",
+          "result": "INFO",
+          "avg_latency_ms": 1255.7
+        },
+        {
+          "test": "HTTP_VERSION",
+          "result": "PASS"
+        },
+        {
+          "test": "RESPONSE_INTEGRITY",
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS"
+    },
+    "DNS_SPOOFING": {
+      "vulnerabilities": [],
+      "tests_performed": [
+        {
+          "test": "DNS_CONSISTENCY",
+          "result": "PASS"
+        },
+        {
+          "test": "REVERSE_DNS",
+          "result": "COMPLETE"
+        }
+      ],
+      "status": "PASS"
+    },
+    "TOKEN_MISUSE": {
+      "vulnerabilities": [],
+      "tests_performed": [],
+      "status": "PASS"
+    },
+    "ROGUE_GATEWAY": {
+      "vulnerabilities": [],
+      "tests_performed": [
+        {
+          "test": "GATEWAY_IDENTIFICATION",
+          "result": "COMPLETE"
+        },
+        {
+          "test": "GATEWAY_STABILITY",
+          "result": "PASS"
+        },
+        {
+          "test": "ROUTING_TABLE",
+          "result": "COMPLETE"
+        }
+      ],
+      "status": "PASS"
+    },
+    "EMAIL_TEST": {
+      "vulnerabilities": [],
+      "tests_performed": [
+        {
+          "test": "password_reset",
+          "url": "https://isafe.xo.je/setup.php",
+          "status_code": 200,
+          "timestamp": "2026-03-04T02:55:00.252054"
+        },
+        {
+          "test": "login_attempt",
+          "url": "https://isafe.xo.je/login.php",
+          "status_code": 200,
+          "timestamp": "2026-03-04T02:55:02.821402"
+        },
+        {
+          "test": "registration_check",
+          "url": "https://isafe.xo.je/register.php",
+          "status_code": 200,
+          "timestamp": "2026-03-04T02:55:05.369582"
+        }
+      ],
+      "status": "PASS"
+    },
+    "SESSION": {
+      "vulnerabilities": [],
+      "tests_performed": [],
+      "status": "PASS"
+    },
+    "ENUM_USER": {
+      "vulnerabilities": [],
+      "tests_performed": [],
+      "status": "PASS"
+    },
+    "TEST_RESET": {
+      "vulnerabilities": [],
+      "tests_performed": [],
+      "status": "PASS"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+import httpx
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+
+COMMON_AUTH_PATHS = [
+    "/login", "/signin", "/auth", "/account", "/session",
+    "/user/login", "/admin/login", "/wp-login.php",
+    "/login.php", "/login.html", "/sign-in",
+]
+
+COMMON_AUTH_KEYWORDS = ["login", "signin", "auth", "account", "session", "password"]
+
+def discover_auth(base_url):
+    results = {
+        "base_url": base_url,
+        "auth_forms": [],
+        "candidate_paths": [],
+    }
+    for path in COMMON_AUTH_PATHS:
+        url = urljoin(base_url, path)
+        try:
+            r = httpx.get(url, timeout=5, follow_redirects=True)
+            if r.status_code == 200:
+                soup = BeautifulSoup(r.text, "html.parser")
+                forms = soup.find_all("form")
+                for form in forms:
+                    inputs = [i.get("type", "text") for i in form.find_all("input")]
+                    if "password" in inputs:
+                        results["auth_forms"].append({
+                            "url": url,
+                            "action": form.get("action", ""),
+                            "method": form.get("method", "get").upper(),
+                            "fields": inputs,
+                        })
+                        results["candidate_paths"].append(url)
+                        print(f"[+] Auth form found at: {url}")
+        except httpx.RequestError:
+            pass
+    try:
+        r = httpx.get(base_url, timeout=8, follow_redirects=True)
+        soup = BeautifulSoup(r.text, "html.parser")
+        for a in soup.find_all("a", href=True):
+            href = a["href"].lower()
+            if any(kw in href for kw in COMMON_AUTH_KEYWORDS):
+                full = urljoin(base_url, a["href"])
+                if full not in results["candidate_paths"]:
+                    results["candidate_paths"].append(full)
+                    print(f"[~] Candidate auth link: {full}")
+    except httpx.RequestError as e:
+        print(f"[!] Could not reach base URL: {e}")
+    return results

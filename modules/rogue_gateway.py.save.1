@@ -1,0 +1,167 @@
+="""
+Rogue Gateway Detection
+Detects rogue/fake gateways in the network
+"""
+import subprocess
+import re
+from datetime import datetime
+from collections import defaultdict
+
+
+def detect_rogue_gateway():
+    """
+    Detect rogue gateway devices:
+    - Monitor gateway MAC changes
+    - Detect multiple devices claiming to be gateway
+    - Check for suspicious routing changes
+    """
+    
+    findings = {
+        "timestamp": datetime.now().isoformat(),
+        "tests_performed": [],
+        "vulnerabilities": [],
+        "alerts": [],
+        "gateway_info": {}
+    }
+    
+    print(f"\n{'='*60}")
+    print(f"  ROGUE GATEWAY DETECTION")
+    print(f"{'='*60}")
+    print(f"Monitoring network gateway...")
+    print(f"{'='*60}\n")
+    
+    # TEST 1: Identify Default Gateway
+    print("[TEST 1] Gateway Identification")
+    
+    try:
+        route_result = subprocess.run(
+            ['ip', 'route', 'show', 'default'],
+            capture_output=True, text=True, timeout=5
+        )
+        
+        gateway_match = re.search(r'default via (\d+\.\d+\.\d+\.\d+)', route_result.stdout)
+        
+        if gateway_match:
+            gateway_ip = gateway_match.group(1)
+            findings["gateway_info"]["ip"] = gateway_ip
+            print(f"  ℹ Gateway IP: {gateway_ip}")
+            
+            # Get gateway MAC
+            arp_result = subprocess.run(['arp', '-n', gateway_ip],
+                                      capture_output=True, text=True, timeout=5)
+            mac_match = re.search(r'([\da-f:]{17})', arp_result.stdout, re.I)
+            
+            if mac_match:
+                gateway_mac = mac_match.group(1)
+                findings["gateway_info"]["mac"] = gateway_mac
+                print(f"  ℹ Gateway MAC: {gateway_mac}")
+                
+                findings["alerts"].append({
+                    "type": "INFO",
+                    "message": f"Legitimate gateway: {gateway_ip} ({gateway_mac})",
+                    "timestamp": datetime.now().isoformat()
+                })
+            else:
+                print(f"  ⚠ Could not determine gateway MAC")
+        else:
+            print(f"  ⚠ No default gateway found")
+        
+        findings["tests_performed"].append({
+            "test": "GATEWAY_IDENTIFICATION",
+            "result": "COMPLETE"
+        })
+        
+    except Exception as e:
+        print(f"  ⚠ Error: {str(e)}")
+    
+    # TEST 2: Monitor for Gateway Changes
+    print(f"\n[TEST 2] Gateway Stability Monitoring")
+    
+    try:
+        import time
+        
+        # Take multiple samples
+        mac_samples = []
+        for i in range(3):
+            arp_result = subprocess.run(
+                ['arp', '-n', findings["gateway_info"].get("ip", "")],
+                capture_output=True, text=True, timeout=5
+            )
+            mac_match = re.search(r'([\da-f:]{17})', arp_result.stdout, re.I)
+            if mac_match:
+                mac_samples.append(mac_match.group(1))
+            time.sleep(1)
+        
+        unique_macs = set(mac_samples)
+        
+        if len(unique_macs) > 1:
+            findings["vulnerabilities"].append({
+                "severity": "CRITICAL",
+                "type": "GATEWAY_MAC_CHANGE",
+                "message": f"Gateway MAC changed during monitoring: {', '.join(unique_macs)}"
+            })
+            print(f"  ❌ CRITICAL: Gateway MAC is changing!")
+            print(f"     MACs detected: {', '.join(unique_macs)}")
+            print(f"     Risk: Rogue gateway or ARP poisoning attack")
+        else:
+            print(f"  ✓ Gateway MAC stable")
+        
+        findings["tests_performed"].append({
+            "test": "GATEWAY_STABILITY",
+            "result": "FAIL" if len(unique_macs) > 1 else "PASS"
+        })
+        
+    except Exception as e:
+        print(f"  ⚠ Error: {str(e)}")
+    
+    # TEST 3: Check Routing Table
+    print(f"\n[TEST 3] Routing Table Integrity")
+    
+    try:
+        route_result = subprocess.run(['ip', 'route'],
+                                     capture_output=True, text=True, timeout=5)
+        
+        routes = route_result.stdout.strip().split('\n')
+        print(f"  ℹ Active routes: {len(routes)}")
+        
+        # Check for suspicious default routes
+        default_routes = [r for r in routes if 'default' in r]
+        
+        if len(default_routes) > 1:
+            findings["vulnerabilities"].append({
+                "severity": "HIGH",
+                "type": "MULTIPLE_DEFAULT_ROUTES",
+                "message": f"Multiple default routes detected ({len(default_routes)})"
+            })
+            print(f"  ⚠ WARNING: Multiple default routes")
+            print(f"     Risk: Traffic manipulation possible")
+        else:
+            print(f"  ✓ Single default route")
+        
+        findings["tests_performed"].append({
+            "test": "ROUTING_TABLE",
+            "result": "COMPLETE"
+        })
+        
+    except Exception as e:
+        print(f"  ⚠ Error: {str(e)}")
+    
+    # Summary
+    print(f"\n{'='*60}")
+    print(f"  SUMMARY")
+    print(f"{'='*60}")
+    print(f"Gateway IP: {findings['gateway_info'].get('ip', 'Unknown')}")
+    print(f"Gateway MAC: {findings['gateway_info'].get('mac', 'Unknown')}")
+    print(f"Vulnerabilities: {len(findings['vulnerabilities'])}")
+    print(f"Alerts: {len(findings['alerts'])}")
+    
+    if findings['vulnerabilities']:
+        print(f"\n❌ ROGUE GATEWAY DETECTED:")
+        for v in findings['vulnerabilities']:
+            print(f"  🔴 [{v['severity']}] {v['message']}")
+    else:
+        print(f"\n✓ No rogue gateway detected")
+    
+    print(f"{'='*60}\n")
+    
+    return findings

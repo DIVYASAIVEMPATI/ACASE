@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACASE Dashboard - Remote Access</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            margin-top: 20px;
+        }
+        
+        .dashboard-section {
+            display: none;
+        }
+        
+        .dashboard-section.active {
+            display: block;
+        }
+        
+        .scan-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .scan-id {
+            font-family: monospace;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status.running {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.complete {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section">
+            <h1>🔐 ACASE Dashboard</h1>
+            <p class="subtitle">Remote Security Assessment Access</p>
+            
+            <div class="input-group">
+                <label for="apiServer">API Server URL</label>
+                <input type="text" id="apiServer" value="http://localhost:8000" placeholder="http://scanner-ip:8000">
+            </div>
+            
+            <div class="input-group">
+                <label for="apiKey">API Key</label>
+                <input type="password" id="apiKey" placeholder="acase_xxxxxxxxxxxx">
+            </div>
+            
+            <button onclick="connectToDashboard()" id="connectBtn">
+                Connect to Scanner
+            </button>
+            
+            <div id="message" class="message"></div>
+        </div>
+        
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="dashboard-section">
+            <h1>📊 Active Scans</h1>
+            <p class="subtitle">Connected to: <span id="connectedServer"></span></p>
+            
+            <div id="scansList"></div>
+            
+            <button onclick="logout()" style="background: #dc3545; margin-top: 20px;">
+                Disconnect
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let apiServer = '';
+        let apiKey = '';
+        
+        async function connectToDashboard() {
+            const serverInput = document.getElementById('apiServer');
+            const keyInput = document.getElementById('apiKey');
+            const btn = document.getElementById('connectBtn');
+            const msg = document.getElementById('message');
+            
+            apiServer = serverInput.value.trim();
+            apiKey = keyInput.value.trim();
+            
+            if (!apiServer || !apiKey) {
+                showMessage('Please enter both API server URL and API key', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Connecting...';
+            
+            try {
+                // Test connection
+                const response = await fetch(`${apiServer}/api/scans/history`, {
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Invalid API key or server unreachable');
+                }
+                
+                const data = await response.json();
+                
+                // Success - show dashboard
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboardSection').classList.add('active');
+                document.getElementById('connectedServer').textContent = apiServer;
+                
+                loadScans(data);
+                
+            } catch (error) {
+                showMessage('Connection failed: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Connect to Scanner';
+            }
+        }
+        
+        function loadScans(data) {
+            const list = document.getElementById('scansList');
+            
+            if (data.total_scans === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#666;">No scans found</p>';
+                return;
+            }
+            
+            list.innerHTML = data.scans.map(scan => `
+                <div class="scan-card">
+                    <div class="scan-id">${scan.scan_id}</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Target:</strong> ${scan.target}<br>
+                        <strong>Email:</strong> ${scan.email}<br>
+                        <strong>Started:</strong> ${new Date(scan.started_at).toLocaleString()}
+                    </div>
+                    <span class="status ${scan.status}">${scan.status.toUpperCase()}</span>
+                </div>
+            `).join('');
+        }
+        
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = 'message ' + type;
+            msg.style.display = 'block';
+            
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 5000);
+        }
+        
+        function logout() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('dashboardSection').classList.remove('active');
+            document.getElementById('apiKey').value = '';
+        }
+        
+        // Enter key to connect
+        document.getElementById('apiKey').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                connectToDashboard();
+            }
+        });
+    </script>
+</body>
+</html>

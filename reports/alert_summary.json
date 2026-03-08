@@ -1,0 +1,40 @@
+{
+  "scan_start": "2026-02-27T08:28:01.837126",
+  "scan_end": "2026-02-27T08:30:38.236918",
+  "total_duration": "0:02:36.399803",
+  "total_alerts": 3,
+  "by_severity": {
+    "INFO": 1,
+    "HIGH": 2
+  },
+  "by_module": {
+    "SYSTEM": 1,
+    "SSL/TLS": 2
+  },
+  "alerts": [
+    {
+      "timestamp": "2026-02-27T08:28:01.837150",
+      "elapsed_time": "0:00:00.000037",
+      "severity": "INFO",
+      "module": "SYSTEM",
+      "message": "Scan initiated",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-02-27T08:28:49.409405",
+      "elapsed_time": "0:00:47.572301",
+      "severity": "HIGH",
+      "module": "SSL/TLS",
+      "message": "Site not using HTTPS - vulnerable to SSL stripping",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-02-27T08:28:49.409650",
+      "elapsed_time": "0:00:47.572530",
+      "severity": "HIGH",
+      "module": "SSL/TLS",
+      "message": "Missing HSTS header - vulnerable to SSL stripping attacks",
+      "details": {}
+    }
+  ]
+}
